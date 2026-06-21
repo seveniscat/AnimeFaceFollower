@@ -1,0 +1,71 @@
+# Xcode
+#
+# gitignore contributors: remember to update Global/Xcode.gitignore, Objective-C.gitignore & Swift.gitignore
+
+## User settings
+xcuserdata/
+
+## compatibility with Xcode 8 and earlier (ignoring not required starting Xcode 9)
+*.xcscmblueprint
+*.xccheckout
+
+## compatibility with Xcode 3 and earlier (ignoring not required starting Xcode 4)
+build/
+DerivedData/
+*.moved-aside
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+
+## Obj-C/Swift specific
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# CocoaPods
+#
+# We recommend against adding the Pods directory to your .gitignore. However
+# you should judge for yourself, the pros and cons are mentioned at:
+# https://guides.cocoapods.org/using/using-cocoapods.html#should-i-check-in-my-pods-directory-in-source-control
+#
+# Note: if you ignore the Pods directory, then you must also
+#   - ignore the Pods directory in the relevant .gitignore files
+#   - add a .gitignore file for Pods in your project
+#   - add Pods to your .gitignore in the .gitignore file for the main project
+#
+/Pods/
+
+# Carthage
+#
+# Carthage is a dependency manager for Cocoa projects. It is similar to CocoaPods
+# but is more lightweight and doesn't require a .xcworkspace.
+# You should check in your Carthage directory in source control.
+# https://github.com/Carthage/Carthage#if-you-use-carthage
+#
+Carthage/Build/
+
+# fastlane
+#
+# It is recommended to not add the fastlane directory to your .gitignore.
+# fastlane/report.xml
+# fastlane/Preview.html
+# fastlane/screenshots
+# fastlane/test_output
+
+# Code Injection
+# After new code injection tools are available, this will be something very common
+#
+# fastlane also supports injection of string resources into archives.
+# https://github.com/fastlane/fastlane#injecting-strings
+#
+fastlane/report.xml
+fastlane/Preview.html
+
+# Add your own rules here
+.DS_Store
