@@ -6,11 +6,12 @@ struct AnimeCharacterView: View {
     let characterCenter: CGPoint
     let faceSize: CGFloat? = nil
     
-    @State private var leftPupilOffset: CGSize = .zero
-    @State private var rightPupilOffset: CGSize = .zero
+    @State private var pupilOffset: CGSize = .zero
     @State private var isBlinking: Bool = false
-    
-    private let maxPupilMove: CGFloat = 13.5
+
+    // 双眼瞳孔共享同一个偏移，保证两眼同步、对称
+    private let maxPupilMove: CGFloat = 22       // 放大眼睛后，瞳孔最大移动距离
+    private let deadZone: CGFloat = 60           // 中心死区半径（屏幕 pt）：目标在附近时回中
     
     var body: some View {
         ZStack {
@@ -44,17 +45,17 @@ struct AnimeCharacterView: View {
                     .offset(y: -78)
             }
             
-            // Eyebrows
-            HStack(spacing: 26) {
+            // Eyebrows（间距与位置适配放大的眼睛）
+            HStack(spacing: 52) {
                 Eyebrow()
                 Eyebrow().rotationEffect(.degrees(8))
             }
-            .offset(y: -26)
+            .offset(y: -52)
             
-            // Eyes
-            HStack(spacing: 32) {
-                EyeView(pupilOffset: leftPupilOffset, isBlinking: isBlinking)
-                EyeView(pupilOffset: rightPupilOffset, isBlinking: isBlinking)
+            // Eyes（放大并加宽间距）
+            HStack(spacing: 42) {
+                EyeView(pupilOffset: pupilOffset, isBlinking: isBlinking)
+                EyeView(pupilOffset: pupilOffset, isBlinking: isBlinking)
             }
             .offset(y: -10)
             
@@ -62,14 +63,14 @@ struct AnimeCharacterView: View {
             MouthView()
                 .offset(y: 52)
             
-            // Blush
-            HStack(spacing: 48) {
-                Circle().fill(Color.pink.opacity(0.28)).frame(width: 28)
-                Circle().fill(Color.pink.opacity(0.28)).frame(width: 28)
+            // Blush（位置避开放大的眼睛）
+            HStack(spacing: 70) {
+                Circle().fill(Color.pink.opacity(0.28)).frame(width: 32)
+                Circle().fill(Color.pink.opacity(0.28)).frame(width: 32)
             }
-            .offset(y: 24)
+            .offset(y: 30)
         }
-        .frame(width: 200, height: 260)
+        .frame(width: 220, height: 280)
         .onChange(of: lookAtScreenPoint) { updatePupils($0) }
         .onAppear(perform: startBlinking)
     }
@@ -77,30 +78,32 @@ struct AnimeCharacterView: View {
     private func updatePupils(_ lookAt: CGPoint?) {
         guard let lookAt = lookAt else {
             withAnimation(.spring(response: 0.22, dampingFraction: 0.68)) {
-                leftPupilOffset = .zero
-                rightPupilOffset = .zero
+                pupilOffset = .zero
             }
             return
         }
-        
-        let leftEye = CGPoint(x: characterCenter.x - 34, y: characterCenter.y - 12)
-        let rightEye = CGPoint(x: characterCenter.x + 34, y: characterCenter.y - 12)
-        
-        let newLeft = calculateOffset(from: leftEye, to: lookAt)
-        let newRight = calculateOffset(from: rightEye, to: lookAt)
-        
+
+        // 用双眼中点作为“视线起点”，两只眼睛共享同一偏移量 → 同步且对称
+        let eyeMid = CGPoint(x: characterCenter.x, y: characterCenter.y - 12)
+        let newOffset = calculateOffset(from: eyeMid, to: lookAt)
+
         withAnimation(.spring(response: 0.16, dampingFraction: 0.72)) {
-            leftPupilOffset = newLeft
-            rightPupilOffset = newRight
+            pupilOffset = newOffset
         }
     }
-    
+
+    /// 计算视线偏移：单位方向 × 距离映射，并在中心死区内归零
     private func calculateOffset(from eye: CGPoint, to target: CGPoint) -> CGSize {
         let dx = target.x - eye.x
         let dy = target.y - eye.y
         let dist = sqrt(dx*dx + dy*dy)
-        guard dist > 10 else { return .zero }
-        let scale = min(maxPupilMove, dist * 0.55) / dist
+
+        // 中心死区：目标足够近时，瞳孔回到正中
+        guard dist > deadZone else { return .zero }
+
+        // 死区外按 (dist - deadZone) 线性映射，并在达到 maxPupilMove 后封顶
+        let magnitude = min(maxPupilMove, (dist - deadZone) * 0.18)
+        let scale = magnitude / dist
         return CGSize(width: dx * scale, height: dy * scale)
     }
     
@@ -124,35 +127,35 @@ struct EyeView: View {
 
     var body: some View {
         ZStack {
-            // 白眼球
-            RoundedRectangle(cornerRadius: 16)
+            // 白眼球（放大）
+            RoundedRectangle(cornerRadius: 22)
                 .fill(Color.white)
-                .frame(width: 44, height: 54)
+                .frame(width: 64, height: 78)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 16)
-                        .stroke(Color(red: 0.22, green: 0.12, blue: 0.38), lineWidth: 2)
+                    RoundedRectangle(cornerRadius: 22)
+                        .stroke(Color(red: 0.22, green: 0.12, blue: 0.38), lineWidth: 2.5)
                 )
 
-            // 瞳孔（仅在非眨眼时显示）
+            // 瞳孔（仅在非眨眼时显示，同步放大）
             if !isBlinking {
                 ZStack {
                     Circle()
                         .fill(Color(red: 0.32, green: 0.55, blue: 0.92))
-                        .frame(width: 26, height: 26)
+                        .frame(width: 38, height: 38)
                     Circle()
                         .fill(Color.white)
-                        .frame(width: 9, height: 9)
-                        .offset(x: -5, y: -5)
+                        .frame(width: 13, height: 13)
+                        .offset(x: -7, y: -7)
                 }
                 .offset(pupilOffset)
             } else {
                 // 眨眼时的眼皮线
                 Capsule()
                     .fill(Color(red: 0.22, green: 0.12, blue: 0.38))
-                    .frame(width: 38, height: 5)
+                    .frame(width: 56, height: 6)
             }
         }
-        .frame(width: 44, height: 54)
+        .frame(width: 64, height: 78)
     }
 }
 

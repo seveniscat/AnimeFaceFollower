@@ -68,9 +68,10 @@ class CameraManager: NSObject, ObservableObject {
         }
 
         let box = observation.boundingBox
-        // 前置摄像头预览已镜像，Vision 坐标原点在左下；将 x 翻转以匹配屏幕
-        let center = CGPoint(x: 1 - (box.origin.x + box.width / 2),
-                             y: box.origin.y + box.height / 2)
+        // x：前置预览已镜像，boundingBox.x 与屏幕方向一致，无需翻转
+        // y：Vision 坐标原点在左下、屏幕原点在左上，需做 1 - y 翻转
+        let center = CGPoint(x: box.origin.x + box.width / 2,
+                             y: 1 - (box.origin.y + box.height / 2))
         DispatchQueue.main.async { self.faceCenterNorm = center }
     }
 }

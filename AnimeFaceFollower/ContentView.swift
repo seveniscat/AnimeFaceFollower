@@ -10,10 +10,10 @@ struct ContentView: View {
                 CameraPreview(session: cameraManager.session)
                     .ignoresSafeArea()
                 
-                // 动漫人物（固定在右下区域）
+                // 动漫人物（屏幕居中）
                 let charCenter = CGPoint(
-                    x: geometry.size.width * 0.78,
-                    y: geometry.size.height * 0.68
+                    x: geometry.size.width * 0.5,
+                    y: geometry.size.height * 0.5
                 )
                 
                 let lookAtPoint: CGPoint? = cameraManager.faceCenterNorm.map { norm in
