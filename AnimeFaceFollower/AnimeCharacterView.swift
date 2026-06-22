@@ -4,7 +4,7 @@ import SwiftUI
 struct AnimeCharacterView: View {
     let lookAtScreenPoint: CGPoint?
     let characterCenter: CGPoint
-    let faceSize: CGFloat?
+    let faceSize: CGFloat? = nil
     
     @State private var leftPupilOffset: CGSize = .zero
     @State private var rightPupilOffset: CGSize = .zero
@@ -115,3 +115,64 @@ struct AnimeCharacterView: View {
 }
 
 // Subviews (EyeView, Eyebrow, MouthView) defined here... (full implementation in repo)
+
+// MARK: - Subviews
+
+struct EyeView: View {
+    let pupilOffset: CGSize
+    let isBlinking: Bool
+
+    var body: some View {
+        ZStack {
+            // 白眼球
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.white)
+                .frame(width: 44, height: 54)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(Color(red: 0.22, green: 0.12, blue: 0.38), lineWidth: 2)
+                )
+
+            // 瞳孔（仅在非眨眼时显示）
+            if !isBlinking {
+                ZStack {
+                    Circle()
+                        .fill(Color(red: 0.32, green: 0.55, blue: 0.92))
+                        .frame(width: 26, height: 26)
+                    Circle()
+                        .fill(Color.white)
+                        .frame(width: 9, height: 9)
+                        .offset(x: -5, y: -5)
+                }
+                .offset(pupilOffset)
+            } else {
+                // 眨眼时的眼皮线
+                Capsule()
+                    .fill(Color(red: 0.22, green: 0.12, blue: 0.38))
+                    .frame(width: 38, height: 5)
+            }
+        }
+        .frame(width: 44, height: 54)
+    }
+}
+
+struct Eyebrow: View {
+    var body: some View {
+        Capsule()
+            .fill(Color(red: 0.18, green: 0.08, blue: 0.32))
+            .frame(width: 34, height: 7)
+    }
+}
+
+struct MouthView: View {
+    var body: some View {
+        Path { path in
+            path.move(to: CGPoint(x: 0, y: 0))
+            path.addQuadCurve(to: CGPoint(x: 24, y: 0),
+                              control: CGPoint(x: 12, y: 14))
+        }
+        .stroke(Color(red: 0.55, green: 0.18, blue: 0.28),
+                style: StrokeStyle(lineWidth: 3, lineCap: .round))
+        .frame(width: 24, height: 14)
+    }
+}

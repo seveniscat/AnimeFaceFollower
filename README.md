@@ -11,22 +11,22 @@ iOS SwiftUI App Demo: Real-time face tracking with Vision framework. An adorable
 
 ## 如何运行
 
-1. 打开 Xcode，创建新的 **iOS App** 项目（选择 SwiftUI 界面，Swift 语言）
-2. 随便命名（例如 AnimeFaceFollower）
-3. 删除默认的 `ContentView.swift`
-4. 将本仓库中的四个 `.swift` 文件添加到你的项目中
-5. 打开 `Info.plist` （或项目设置 → Info），添加相机权限：
-   ```xml
-   <key>NSCameraUsageDescription</key>
-   <string>需要相机权限来实时检测人脸，让动漫人物眼睛跟随你</string>
-   ```
-6. 在真机上 Build & Run（前置摄像头 + 人脸检测在真机上效果最好，Simulator 支持有限）
+本项目已包含完整的 Xcode 工程，相机权限（`NSCameraUsageDescription`）已配置在 target 的 Info 设置中。
+
+1. 用 Xcode 打开 `AnimeFaceFollower.xcodeproj`
+2. 选择一个真机或模拟器作为运行目标
+3. 按 ⌘R Build & Run（前置摄像头 + 人脸检测在真机上效果最好，Simulator 支持有限）
+
+> 命令行编译（仅验证，不签名）：
+> ```bash
+> xcodebuild -project AnimeFaceFollower.xcodeproj -target AnimeFaceFollower >   -sdk iphoneos -configuration Debug CODE_SIGNING_ALLOWED=NO ARCHS=arm64 build
+> ```
 
 ## 项目结构
-- `CameraManager.swift` — 处理 AVCaptureSession + Vision 人脸检测
-- `CameraPreview.swift` — UIViewRepresentable 实现实时摄像头预览
-- `AnimeCharacterView.swift` — 可爱动漫人物 + 眼睛跟随逻辑
-- `ContentView.swift` — 主界面，组合所有组件
+- `AnimeFaceFollower/CameraManager.swift` — 处理 AVCaptureSession + Vision 人脸检测
+- `AnimeFaceFollower/CameraPreview.swift` — UIViewRepresentable 实现实时摄像头预览
+- `AnimeFaceFollower/AnimeCharacterView.swift` — 可爱动漫人物 + 眼睛跟随逻辑
+- `AnimeFaceFollower/ContentView.swift` — 主界面，组合所有组件
 
 ## 技术实现
 - 使用 `VNDetectFaceRectanglesRequest` 实时人脸检测
