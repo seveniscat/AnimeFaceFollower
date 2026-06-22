@@ -5,6 +5,10 @@ import Vision
 
 class CameraManager: NSObject, ObservableObject {
     @Published var faceCenterNorm: CGPoint? = nil
+    #if DEBUG
+    /// 调试用：最新人脸框（已转换到屏幕坐标系，归一化 0~1，原点左上）
+    @Published var faceBoxNorm: CGRect? = nil
+    #endif
 
     let session = AVCaptureSession()
     private let sessionQueue = DispatchQueue(label: "camera.session.queue")
@@ -63,7 +67,12 @@ class CameraManager: NSObject, ObservableObject {
 
     private func handleFaces(_ observations: [VNFaceObservation], for buffer: CVPixelBuffer) {
         guard let observation = observations.max(by: { $0.boundingBox.width < $1.boundingBox.width }) else {
-            DispatchQueue.main.async { self.faceCenterNorm = nil }
+            DispatchQueue.main.async {
+                self.faceCenterNorm = nil
+                #if DEBUG
+                self.faceBoxNorm = nil
+                #endif
+            }
             return
         }
 
@@ -72,7 +81,18 @@ class CameraManager: NSObject, ObservableObject {
         // y：Vision 坐标原点在左下、屏幕原点在左上，需做 1 - y 翻转
         let center = CGPoint(x: box.origin.x + box.width / 2,
                              y: 1 - (box.origin.y + box.height / 2))
+        #if DEBUG
+        let screenBox = CGRect(x: box.origin.x,
+                               y: 1 - box.origin.y - box.height,
+                               width: box.width,
+                               height: box.height)
+        DispatchQueue.main.async {
+            self.faceCenterNorm = center
+            self.faceBoxNorm = screenBox
+        }
+        #else
         DispatchQueue.main.async { self.faceCenterNorm = center }
+        #endif
     }
 }
 
